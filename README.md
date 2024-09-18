@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# A Code Station app using create-react-app, antd, react-router-dom, redux
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
