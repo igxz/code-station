@@ -9,7 +9,7 @@ const { Header, Footer, Content } = Layout;
 
 function App() {
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#00b96b' } }}>
+    <ConfigProvider>
       <>
         {/* heaer */}
         <Header className='header'>

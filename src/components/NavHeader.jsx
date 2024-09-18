@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from "react-router-dom";
-import {Input, Select, Button} from "antd";
+import {Input, Select, Button, Space} from "antd";
 
 const NavHeader = () => {
   return (
@@ -17,8 +17,8 @@ const NavHeader = () => {
           </nav>
           {/* 搜索框 */}
           <div className="searchContainer">
-              <Input.Group>
-                  <Select defaultValue="issue" size="large" style={{width:"20%"}}>
+              <Space.Compact>
+                  <Select defaultValue="issue" size="large" style={{width:"30%"}}>
                       <Select.Option value="issue">issues</Select.Option>
                       <Select.Option value="book">books</Select.Option>
                   </Select>
@@ -31,11 +31,11 @@ const NavHeader = () => {
                           width:"70%"
                       }}
                   />
-              </Input.Group>
+              </Space.Compact>
           </div>
           {/* 登录按钮 */}
           <div className="loginBtnContainer">
-              <Button type="primary" size="large">注册/登录</Button>
+              <Button type="primary" size="large">Register / Login</Button>
           </div>
       </div>
   );
