@@ -1,5 +1,8 @@
-import React, { useCallback, useState, useMemo, useRef } from 'react';
-import { Modal, Radio, Form, Button, Input, Col, Row, Checkbox } from 'antd';
+import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
+import { Modal, Radio, Form, Button, Input, Col, Row, Checkbox, message } from 'antd';
+import { getCaptcha, userIsExist,addUser } from "../api/user";
+import { initUserInfo } from '../redux/userSlices';
+import { useDispatch } from 'react-redux';
 
 import styles from '../css/LoginForm.module.css';
 
@@ -22,13 +25,25 @@ const LoginForm = (props) => {
 
   const [captcha, setCaptcha] = useState(null);
 
+  const dispatch = useDispatch();
+
+  const captchaClickHandle = async () => {
+    const data = await getCaptcha();
+    // console.log(data);
+    setCaptcha(data);
+  };
+
+  useEffect(() => {
+    captchaClickHandle();
+  }, [props.isShown]);
+
   const handleOk = useCallback(() => {
     console.log('OK is clicked');
   }, []);
 
   const onChange = useCallback((e) => {
     setValue(e.target.value);
-    // console.log(e.target.value);
+    captchaClickHandle();
   }, []);
 
   const loginHandle = useCallback(() => {
@@ -41,13 +56,29 @@ const LoginForm = (props) => {
     setValue(obj);
   };
 
-  const captchaClickHandle = () => {
-    console.log('captcha clicked');
-  };
+  const checkLoginIdIsExist = useCallback(async () => {
+    if(registerInfo.loginId){
+        const { data } = await userIsExist(registerInfo.loginId);
+        if(data){
+            return Promise.reject(`User ${registerInfo.loginId} already exists`);
+        }
+    }
+  },[registerInfo.loginId]);
 
-  const registerHandle = () => {
-    console.log('register is clicked');
-  };
+  // when 'Register' button is clicked
+  const registerHandle = useCallback( async () => {
+    const result = await addUser(registerInfo);
+    if(result.data){
+      message.success('user added successfully, default password is 123456 ');
+      // add user to the store
+      dispatch(initUserInfo(result.data));
+    }else{
+      message.warning(result.message);
+      captchaClickHandle();
+    }
+
+    console.log(result);
+  },[registerInfo]);
 
   const formContainer = useMemo(() => {
     if (value === 1) {
@@ -58,7 +89,7 @@ const LoginForm = (props) => {
             autoComplete='off'
             onFinish={loginHandle}
             ref={loginFormRef}
-            labelCol={{ span: 6 }} // This adjusts the label width
+            labelCol={{ span: 7 }} // This adjusts the label width
             wrapperCol={{ span: 18 }} // This adjusts the input field width
           >
             <Form.Item
@@ -190,7 +221,7 @@ const LoginForm = (props) => {
             autoComplete='off'
             ref={registerFormRef}
             onFinish={registerHandle}
-            labelCol={{ span: 6 }} // This adjusts the label width
+            labelCol={{ span: 7 }} // This adjusts the label width
             wrapperCol={{ span: 18 }} // This adjusts the input field width
           >
             <Form.Item
@@ -201,8 +232,8 @@ const LoginForm = (props) => {
                   required: true,
                   message: 'Please input your login ID',
                 },
-                // 验证用户是否已经存在
-                // { validator: checkLoginIdIsExist },
+                // check if user exists already
+                { validator: checkLoginIdIsExist },
               ]}
               validateTrigger='onBlur'
             >
@@ -223,7 +254,7 @@ const LoginForm = (props) => {
             <Form.Item label='Nick Name' name='nickname'>
               <Input
                 placeholder='Please input a Nick Name, default name is xxx'
-                value={registerInfo.nickname}
+                value={registerInfo.nickName}
                 onChange={(e) =>
                   updateInfo(
                     registerInfo,
@@ -291,7 +322,7 @@ const LoginForm = (props) => {
         </div>
       );
     }
-  }, [captcha, loginHandle, loginInfo, registerInfo, value]);
+  }, [captcha, checkLoginIdIsExist, loginHandle, loginInfo, registerHandle, registerInfo, value]);
 
   return (
     <>

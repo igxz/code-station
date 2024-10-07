@@ -10,8 +10,11 @@ const userSlice = createSlice({
     initUserInfo: (state, { payload }) => {
       state.userInfo = payload;
     },
+    changeUserLoginStatus: (state, { payload }) => {
+      state.isLogin = payload;
+    },
   },
 });
 
-// const {initUserInfo} = userSlice.actions;
+export const { initUserInfo, changeUserLoginStatus } = userSlice.actions;
 export default userSlice.reducer;
