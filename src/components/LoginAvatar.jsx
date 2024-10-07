@@ -25,7 +25,7 @@ const LoginAvatar = (props) => {
     loginStatus = (
       <Popover content={content} trigger='hover' placement='bottom'>
         <div className={styles.avatarContainer}>
-          <Avatar src='' preview={false} size='large' icon={<UserOutlined />} />
+          <Avatar src='' size='large' icon={<UserOutlined />} />
         </div>
       </Popover>
     );

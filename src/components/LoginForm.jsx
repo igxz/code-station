@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { Modal, Radio, Form, Button, Input, Col, Row, Checkbox, message } from 'antd';
 import { getCaptcha, userIsExist,addUser } from "../api/user";
-import { initUserInfo } from '../redux/userSlices';
+import { initUserInfo, changeUserLoginStatus } from '../redux/userSlices';
 import { useDispatch } from 'react-redux';
 
 import styles from '../css/LoginForm.module.css';
@@ -72,13 +72,15 @@ const LoginForm = (props) => {
       message.success('user added successfully, default password is 123456 ');
       // add user to the store
       dispatch(initUserInfo(result.data));
+      // update the user's login status in store
+      dispatch(changeUserLoginStatus(true));
     }else{
       message.warning(result.message);
       captchaClickHandle();
     }
 
-    console.log(result);
-  },[registerInfo]);
+    // console.log(result);
+  },[dispatch, registerInfo]);
 
   const formContainer = useMemo(() => {
     if (value === 1) {
