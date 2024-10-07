@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Button, List, Popover, Avatar } from 'antd';
+import { Button, List, Popover, Avatar, Image } from 'antd';
 import styles from '../css/LoginAvatar.module.css';
 import { UserOutlined } from '@ant-design/icons';
 
@@ -8,7 +8,7 @@ import { UserOutlined } from '@ant-design/icons';
  * display user avatar if logged in, otherwise display login / register button
  */
 const LoginAvatar = (props) => {
-  const { isLogin } = useSelector((state) => state.user);
+  const { isLogin, userInfo } = useSelector((state) => state.user);
 
   let loginStatus = null;
   if (isLogin) {
@@ -25,7 +25,7 @@ const LoginAvatar = (props) => {
     loginStatus = (
       <Popover content={content} trigger='hover' placement='bottom'>
         <div className={styles.avatarContainer}>
-          <Avatar src='' size='large' icon={<UserOutlined />} />
+          <Avatar src={<Image src={userInfo?.avatar}/>} size='large' icon={<UserOutlined />} />
         </div>
       </Popover>
     );

@@ -15,7 +15,6 @@ const LoginForm = (props) => {
     remember: false,
   });
   const loginFormRef = useRef(null);
-
   const registerFormRef = useRef(null);
   const [registerInfo, setRegisterInfo] = useState({
     loginId: '',
@@ -55,6 +54,32 @@ const LoginForm = (props) => {
     obj[key] = value;
     setValue(obj);
   };
+
+  const handleCancel = () => {
+    setRegisterInfo({
+      loginId: '',
+      nickName: '',
+      captcha: '',
+    });
+
+    setLoginInfo({
+      loginId: '',
+      loginPwd: '',
+      captcha: '',
+      remember: false,
+    });
+
+      // Reset form fields using the Form ref
+  if (loginFormRef.current) {
+    loginFormRef.current.resetFields();
+  }
+  
+  if (registerFormRef.current) {
+    registerFormRef.current.resetFields();
+  }
+
+    props.handelCancel();
+  }
 
   const checkLoginIdIsExist = useCallback(async () => {
     if(registerInfo.loginId){
@@ -332,7 +357,7 @@ const LoginForm = (props) => {
         title='Register / Login'
         open={props.isShown}
         onOk={handleOk}
-        onCancel={props.handelCancel}
+        onCancel={handleCancel}
       >
         <Radio.Group
           value={value}
