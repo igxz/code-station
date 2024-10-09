@@ -1,6 +1,28 @@
-import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
-import { Modal, Radio, Form, Button, Input, Col, Row, Checkbox, message } from 'antd';
-import { getCaptcha, userIsExist,addUser } from "../api/user";
+import React, {
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
+import {
+  Modal,
+  Radio,
+  Form,
+  Button,
+  Input,
+  Col,
+  Row,
+  Checkbox,
+  message,
+} from 'antd';
+import {
+  getCaptcha,
+  userIsExist,
+  addUser,
+  userLogin,
+  getUserById,
+} from '../api/user';
 import { initUserInfo, changeUserLoginStatus } from '../redux/userSlices';
 import { useDispatch } from 'react-redux';
 
@@ -45,17 +67,7 @@ const LoginForm = (props) => {
     captchaClickHandle();
   }, []);
 
-  const loginHandle = useCallback(() => {
-    console.log('Login Form has been submitted');
-  }, []);
-
-  const updateInfo = (loginInfo, value, key, setValue) => {
-    const obj = { ...loginInfo };
-    obj[key] = value;
-    setValue(obj);
-  };
-
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setRegisterInfo({
       loginId: '',
       nickName: '',
@@ -69,43 +81,83 @@ const LoginForm = (props) => {
       remember: false,
     });
 
-      // Reset form fields using the Form ref
-  if (loginFormRef.current) {
-    loginFormRef.current.resetFields();
-  }
-  
-  if (registerFormRef.current) {
-    registerFormRef.current.resetFields();
-  }
+    // Reset form fields using the Form ref
+    if (loginFormRef.current) {
+      loginFormRef.current.resetFields();
+    }
+
+    if (registerFormRef.current) {
+      registerFormRef.current.resetFields();
+    }
 
     props.handelCancel();
-  }
+  }, [props]);
+
+  const loginHandle = useCallback(async () => {
+    const result = await userLogin(loginInfo);
+    if (result.data) {
+      // 2. account has been locked
+      // 3. account is valid and password is correct
+      const data = result.data;
+      if (!data.data) {
+        // 1. password is not correct
+        message.error('Login ID or Password not correct');
+        captchaClickHandle();
+      } else if (!data.data.enabled) {
+        message.warning('Account has been locked!');
+        captchaClickHandle();
+      } else {
+        // save token to local storage
+        localStorage.userToken = data.token;
+        // save user information into store
+        const result = await getUserById(data.data._id);
+        console.log(result);
+        dispatch(initUserInfo(result.data));
+        dispatch(changeUserLoginStatus(true));
+        handleCancel();
+        message.info('Login success');
+      }
+    } else {
+      // captcha code is not valid
+      message.warning(result.msg);
+      // refresh cap
+      captchaClickHandle();
+    }
+
+    // console.log(result, '<--------- result');
+  }, [dispatch, handleCancel, loginInfo]);
+
+  const updateInfo = (loginInfo, value, key, setValue) => {
+    const obj = { ...loginInfo };
+    obj[key] = value;
+    setValue(obj);
+  };
 
   const checkLoginIdIsExist = useCallback(async () => {
-    if(registerInfo.loginId){
-        const { data } = await userIsExist(registerInfo.loginId);
-        if(data){
-            return Promise.reject(`User ${registerInfo.loginId} already exists`);
-        }
+    if (registerInfo.loginId) {
+      const { data } = await userIsExist(registerInfo.loginId);
+      if (data) {
+        return Promise.reject(`User ${registerInfo.loginId} already exists`);
+      }
     }
-  },[registerInfo.loginId]);
+  }, [registerInfo.loginId]);
 
   // when 'Register' button is clicked
-  const registerHandle = useCallback( async () => {
+  const registerHandle = useCallback(async () => {
     const result = await addUser(registerInfo);
-    if(result.data){
+    if (result.data) {
       message.success('user added successfully, default password is 123456 ');
       // add user to the store
       dispatch(initUserInfo(result.data));
       // update the user's login status in store
       dispatch(changeUserLoginStatus(true));
-    }else{
+    } else {
       message.warning(result.message);
       captchaClickHandle();
     }
 
     // console.log(result);
-  },[dispatch, registerInfo]);
+  }, [dispatch, registerInfo]);
 
   const formContainer = useMemo(() => {
     if (value === 1) {
@@ -349,7 +401,15 @@ const LoginForm = (props) => {
         </div>
       );
     }
-  }, [captcha, checkLoginIdIsExist, loginHandle, loginInfo, registerHandle, registerInfo, value]);
+  }, [
+    captcha,
+    checkLoginIdIsExist,
+    loginHandle,
+    loginInfo,
+    registerHandle,
+    registerInfo,
+    value,
+  ]);
 
   return (
     <>

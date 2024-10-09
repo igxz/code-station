@@ -9,7 +9,7 @@ service.interceptors.request.use(
     (config)=>{
         // intercept the request to
         // e.g: add token. etc~
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('userToken');
         if(token){
             config.headers.Authorization = 'Bearer ' + token;
         }

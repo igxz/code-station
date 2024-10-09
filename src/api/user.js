@@ -20,10 +20,46 @@ export function userIsExist(loginId) {
   });
 }
 
+/**
+ * 
+ * user registration
+ */
 export function addUser(user) {
     return request({
         url: '/api/user',
         data: user,
         method: 'POST',
     });
+}
+
+/**
+ * user login
+ */
+export function userLogin(loginInfo) {
+  return request({
+    url: '/api/user/login',
+    data: loginInfo,
+    method: 'POST',
+  })
+}
+
+/**
+ * get user by id
+ */
+export function getUserById(id) {
+  return request({
+    url: `/api/user/${id}`,
+    method: 'GET',
+  });
+}
+
+
+/**
+ * get user by token
+ */
+export function getUserByToken(){
+  return request({
+    url: '/api/user/whoami',
+    method: 'GET',
+  });
 }
