@@ -67,31 +67,34 @@ const LoginForm = (props) => {
     captchaClickHandle();
   }, []);
 
-  const handleCancel = useCallback(() => {
-    setRegisterInfo({
-      loginId: '',
-      nickName: '',
-      captcha: '',
-    });
+  const handleReset = useCallback(
+    (isCancel) => {
+      setRegisterInfo({
+        loginId: '',
+        nickName: '',
+        captcha: '',
+      });
 
-    setLoginInfo({
-      loginId: '',
-      loginPwd: '',
-      captcha: '',
-      remember: false,
-    });
+      setLoginInfo({
+        loginId: '',
+        loginPwd: '',
+        captcha: '',
+        remember: false,
+      });
 
-    // Reset form fields using the Form ref
-    if (loginFormRef.current) {
-      loginFormRef.current.resetFields();
-    }
+      // Reset form fields using the Form ref
+      if (loginFormRef.current) {
+        loginFormRef.current.resetFields();
+      }
 
-    if (registerFormRef.current) {
-      registerFormRef.current.resetFields();
-    }
+      if (registerFormRef.current) {
+        registerFormRef.current.resetFields();
+      }
 
-    props.handelCancel();
-  }, [props]);
+      isCancel && props.handelCancel();
+    },
+    [props]
+  );
 
   const loginHandle = useCallback(async () => {
     const result = await userLogin(loginInfo);
@@ -111,10 +114,10 @@ const LoginForm = (props) => {
         localStorage.userToken = data.token;
         // save user information into store
         const result = await getUserById(data.data._id);
-        console.log(result);
+        // console.log(result);
         dispatch(initUserInfo(result.data));
         dispatch(changeUserLoginStatus(true));
-        handleCancel();
+        handleReset(true);
         message.info('Login success');
       }
     } else {
@@ -125,7 +128,7 @@ const LoginForm = (props) => {
     }
 
     // console.log(result, '<--------- result');
-  }, [dispatch, handleCancel, loginInfo]);
+  }, [dispatch, handleReset, loginInfo]);
 
   const updateInfo = (loginInfo, value, key, setValue) => {
     const obj = { ...loginInfo };
@@ -285,7 +288,13 @@ const LoginForm = (props) => {
               >
                 Login
               </Button>
-              <Button type='primary' htmlType='submit'>
+              <Button
+                type='primary'
+                htmlType='submit'
+                onClick={() => {
+                  handleReset(false);
+                }}
+              >
                 Reset
               </Button>
             </Form.Item>
@@ -393,7 +402,13 @@ const LoginForm = (props) => {
               >
                 Register
               </Button>
-              <Button type='primary' htmlType='submit'>
+              <Button
+                type='primary'
+                htmlType='submit'
+                onClick={() => {
+                  handleReset(false);
+                }}
+              >
                 Reset
               </Button>
             </Form.Item>
@@ -404,6 +419,7 @@ const LoginForm = (props) => {
   }, [
     captcha,
     checkLoginIdIsExist,
+    handleReset,
     loginHandle,
     loginInfo,
     registerHandle,
@@ -417,7 +433,9 @@ const LoginForm = (props) => {
         title='Register / Login'
         open={props.isShown}
         onOk={handleOk}
-        onCancel={handleCancel}
+        onCancel={() => {
+          handleReset(true);
+        }}
       >
         <Radio.Group
           value={value}
